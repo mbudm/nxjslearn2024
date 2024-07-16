@@ -27,10 +27,6 @@ const getCurrentPage = (totalPages: number, searchParam?: number) => {
     return 1
   }
 }
-
-const createRedirectUrl = (pathname: string | null, query: string | undefined, page: number) => {
- return `${pathname}?query=${ query || '' }&page=${page}`;
-}
  
 export default async function Page({
   searchParams,
@@ -41,7 +37,7 @@ export default async function Page({
 
   if (Number(searchParams?.page) && currentPage !== Number(searchParams?.page) ){
     const headersList = headers();
-    const redirectUrl = `${headersList.get("x-pathname")}?query=${searchParams?.query}&page=${currentPage}`;
+    const redirectUrl = `${headersList.get("x-pathname")}?query=${searchParams?.query || ''}&page=${currentPage}`;
 
     // overwrites the current page but should push?
     redirect(redirectUrl)

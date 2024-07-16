@@ -18,13 +18,23 @@ interface PageProps {
   searchParams?: SearchParams;
 }
 
-const getCurrentPage = (totalPages: number, searchParam?: number) => {
-  if (searchParam !== undefined && searchParam <= totalPages) {
-    return searchParam
-  } else if (searchParam !== undefined && searchParam > totalPages) {
-    return totalPages
+// Eminently testable
+const getCurrentPageAndRedirect = (totalPages: number, pathname: string | null, searchParams?: SearchParams) => {
+  let currentPage, redirectUrl;
+  const pageParam = Number(searchParams?.page);
+
+  if (pageParam !== undefined && pageParam <= totalPages) {
+    currentPage = pageParam
+  } else if (pageParam !== undefined && pageParam > totalPages) {
+    currentPage = totalPages
+    redirectUrl = `${pathname || ''}?query=${searchParams?.query || ''}&page=${currentPage}`;
   } else {
-    return 1
+    currentPage = 1
+  }
+
+  return {
+    currentPage,
+    redirectUrl
   }
 }
  
@@ -33,12 +43,10 @@ export default async function Page({
 }: PageProps) {
   const query = searchParams?.query || '';
   const totalPages = await fetchInvoicesPages(query);
-  const currentPage = getCurrentPage(totalPages, Number(searchParams?.page))
+  const headersList = headers();
+  const { currentPage, redirectUrl } = getCurrentPageAndRedirect(totalPages, headersList.get("x-pathname"), searchParams)
 
-  if (Number(searchParams?.page) && currentPage !== Number(searchParams?.page) ){
-    const headersList = headers();
-    const redirectUrl = `${headersList.get("x-pathname")}?query=${searchParams?.query || ''}&page=${currentPage}`;
-
+  if (redirectUrl !== undefined) {
     // overwrites the current page but should push?
     redirect(redirectUrl)
   }

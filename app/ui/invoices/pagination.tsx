@@ -3,21 +3,32 @@
 import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import Link from 'next/link';
+import { ReadonlyURLSearchParams, usePathname, useSearchParams } from 'next/navigation';
+
 import { generatePagination } from '@/app/lib/utils';
 
-export default function Pagination({ totalPages }: { totalPages: number }) {
-  // NOTE: Uncomment this code in Chapter 11
+const createPageURL = (pageNumber: number | string, pathname?: string, searchParams?:ReadonlyURLSearchParams ) => {
+  const params = new URLSearchParams(searchParams);
+  params.set('page', pageNumber.toString());
+  return `${pathname}?${params.toString()}`;
+};
 
-  // const allPages = generatePagination(currentPage, totalPages);
+
+export default function Pagination({ totalPages }: { totalPages: number }) {
+
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentPage = Number(searchParams.get('page')) || 1;
+
+
+  const allPages = generatePagination(currentPage, totalPages);
 
   return (
     <>
-      {/*  NOTE: Uncomment this code in Chapter 11 */}
-
-      {/* <div className="inline-flex">
+      <div className="inline-flex">
         <PaginationArrow
           direction="left"
-          href={createPageURL(currentPage - 1)}
+          href={createPageURL(currentPage - 1, pathname, searchParams)}
           isDisabled={currentPage <= 1}
         />
 
@@ -33,7 +44,7 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
             return (
               <PaginationNumber
                 key={page}
-                href={createPageURL(page)}
+                href={createPageURL(page, pathname, searchParams)}
                 page={page}
                 position={position}
                 isActive={currentPage === page}
@@ -44,10 +55,10 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
 
         <PaginationArrow
           direction="right"
-          href={createPageURL(currentPage + 1)}
+          href={createPageURL(currentPage + 1, pathname, searchParams)}
           isDisabled={currentPage >= totalPages}
         />
-      </div> */}
+      </div>
     </>
   );
 }
